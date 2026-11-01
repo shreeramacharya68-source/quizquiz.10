@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>कक्षा १० नेपाली शब्दार्थ क्विज (Strict Selection Mode)</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;600;700;800&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Mukta', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #090d1f 0%, #1e1b4b 100%);
+      color: #f8fafc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+    }
+
+    header {
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(12px);
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .title-box h1 {
+      font-size: 24px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #38bdf8, #818cf8);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .title-box p {
+      font-size: 13px;
+      color: #94a3b8;
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .timer-card {
+      background: #0f172a;
+      border: 2px solid #38bdf8;
+      border-radius: 12px;
+      padding: 4px 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-width: 130px;
+    }
+
+    .timer-text {
+      font-size: 20px;
+      font-weight: 800;
+      color: #38bdf8;
+    }
+
+    .pass-tag {
+      font-size: 10px;
+      color: #cbd5e1;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 1px 6px;
+      border-radius: 8px;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary { background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; }
+    .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+    .btn-pass { background: linear-gradient(135deg, #8b5cf6, #6d28d9); color: white; }
+    .btn-nav { background: #334155; color: #f8fafc; }
+
+    .direction-toggle {
+      background: #1e293b;
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      padding: 3px;
+      display: flex;
+      gap: 3px;
+    }
+
+    .dir-btn {
+      padding: 5px 10px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .dir-btn.active {
+      background: #38bdf8;
+      color: #0f172a;
+    }
+
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 300px 1fr;
+      gap: 16px;
+      padding: 16px;
+      max-width: 1600px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .scoreboard {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .scoreboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 8px;
+    }
+
+    .scoreboard-title { font-size: 18px; font-weight: 700; color: #cbd5e1; }
+
+    .group-card {
+      background: #0f172a;
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 2px solid transparent;
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+    }
+
+    .group-card.active-turn {
+      border-color: #38bdf8;
+      box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
+      transform: scale(1.02);
+    }
+
+    .group-card.active-turn::before {
+      content: 'पालो';
+      position: absolute;
+      top: -9px;
+      right: 12px;
+      background: #38bdf8;
+      color: #0f172a;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 1px 6px;
+      border-radius: 8px;
+    }
+
+    .group-a { border-left: 5px solid #ef4444; }
+    .group-b { border-left: 5px solid #3b82f6; }
+    .group-c { border-left: 5px solid #10b981; }
+    .group-d { border-left: 5px solid #f59e0b; }
+
+    .group-info h3 { font-size: 17px; font-weight: 700; }
+    .score-display { font-size: 24px; font-weight: 800; color: #f8fafc; }
+
+    .score-btn-group { display: flex; gap: 4px; }
+    .score-btn {
+      width: 30px; height: 30px; border-radius: 6px; border: none; font-weight: 800; font-size: 14px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .btn-add { background: #10b981; color: white; }
+    .btn-sub { background: #ef4444; color: white; }
+
+    /* Quiz Area */
+    .quiz-area {
+      background: rgba(30, 41, 59, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .quiz-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .q-number { font-size: 20px; font-weight: 700; color: #94a3b8; }
+    .turn-indicator {
+      background: rgba(56, 189, 248, 0.15);
+      color: #38bdf8;
+      padding: 6px 16px;
+      border-radius: 18px;
+      font-size: 16px;
+      font-weight: 700;
+      border: 1px solid #38bdf8;
+    }
+
+    .card-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .word-box {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 2px solid rgba(255, 255, 255, 0.15);
+      border-radius: 18px;
+      padding: 24px 30px;
+      width: 100%;
+      max-width: 800px;
+      text-align: center;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .word-label { font-size: 15px; color: #94a3b8; margin-bottom: 4px; }
+    .word-text { font-size: 42px; font-weight: 800; color: #f1f5f9; }
+
+    /* 5 Options Grid (क, ख, ग, घ, ङ) */
+    .options-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .option-btn {
+      background: #1e293b;
+      border: 2px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 20px;
+      font-weight: 700;
+      color: #e2e8f0;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option-btn:hover {
+      background: #334155;
+      border-color: #38bdf8;
+      transform: translateY(-2px);
+    }
+
+    .option-btn.correct {
+      background: linear-gradient(135deg, #059669, #047857) !important;
+      border-color: #34d399 !important;
+      color: #fff !important;
+    }
+
+    .option-btn.wrong {
+      background: linear-gradient(135deg, #b91c1c, #991b1b) !important;
+      border-color: #f87171 !important;
+      color: #fff !important;
+      opacity: 0.7;
+    }
+
+    .quiz-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    /* Modal Grid */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(15, 23, 42, 0.95);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: #1e293b;
+      border-radius: 20px;
+      padding: 24px;
+      max-width: 850px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+    }
+
+    .grid-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(55px, 1fr));
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .grid-item {
+      aspect-ratio: 1;
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .grid-item:hover { background: #38bdf8; color: #0f172a; }
+    .grid-item.completed { background: #059669; color: #fff; }
+    .grid-item.active { background: #f59e0b; color: #0f172a; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="title-box">
+      <h1 contenteditable="true">कक्षा १० नेपाली शब्दार्थ क्विज (CDC १७ वटै पाठ)</h1>
+      <p contenteditable="true">प्रश्न छनोट मोड (Strict Selection Mode)</p>
+    </div>
+
+    <div class="header-controls">
+      <div class="direction-toggle">
+        <button class="dir-btn active" id="dir-cw" onclick="setDirection('cw')"><i class="fa-solid fa-rotate-right"></i> घडी दिशा</button>
+        <button class="dir-btn" id="dir-ccw" onclick="setDirection('ccw')"><i class="fa-solid fa-rotate-left"></i> उल्टो दिशा</button>
+      </div>
+
+      <div class="timer-card">
+        <div class="timer-text" id="timer-display">००:३०</div>
+        <div class="pass-tag" id="pass-tag">मुख्य पालो (३० से.)</div>
+      </div>
+
+      <button class="btn btn-pass" onclick="handlePass()"><i class="fa-solid fa-share"></i> पास (Pass)</button>
+      <button class="btn btn-nav" onclick="toggleModal()"><i class="fa-solid fa-grid-2"></i> प्रश्न छान्नुहोस्</button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="scoreboard">
+      <div class="scoreboard-header">
+        <span class="scoreboard-title">समूह अङ्क</span>
+        <button class="btn btn-warning" style="padding:2px 8px; font-size:11px;" onclick="resetScores()">रिसेट</button>
+      </div>
+      
+      <div class="group-card group-a active-turn" id="card-group-0">
+        <div class="group-info">
+          <h3 style="color:#ef4444;">समूह 'क'</h3>
+          <div class="score-display" id="score-0">०</div>
+        </div>
+        <div class="score-btn-group">
+          <button class="score-btn btn-add" onclick="updateScore(0, 10)">+</button>
+          <button class="score-btn btn-sub" onclick="updateScore(0, -5)">-</button>
+        </div>
+      </div>
+
+      <div class="group-card group-b" id="card-group-1">
+        <div class="group-info">
+          <h3 style="color:#3b82f6;">समूह 'ख'</h3>
+          <div class="score-display" id="score-1">०</div>
+        </div>
+        <div class="score-btn-group">
+          <button class="score-btn btn-add" onclick="updateScore(1, 10)">+</button>
+          <button class="score-btn btn-sub" onclick="updateScore(1, -5)">-</button>
+        </div>
+      </div>
+
+      <div class="group-card group-c" id="card-group-2">
+        <div class="group-info">
+          <h3 style="color:#10b981;">समूह 'ग'</h3>
+          <div class="score-display" id="score-2">०</div>
+        </div>
+        <div class="score-btn-group">
+          <button class="score-btn btn-add" onclick="updateScore(2, 10)">+</button>
+          <button class="score-btn btn-sub" onclick="updateScore(2, -5)">-</button>
+        </div>
+      </div>
+
+      <div class="group-card group-d" id="card-group-3">
+        <div class="group-info">
+          <h3 style="color:#f59e0b;">समूह 'घ'</h3>
+          <div class="score-display" id="score-3">०</div>
+        </div>
+        <div class="score-btn-group">
+          <button class="score-btn btn-add" onclick="updateScore(3, 10)">+</button>
+          <button class="score-btn btn-sub" onclick="updateScore(3, -5)">-</button>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="margin-top:auto;" onclick="manualTurnSwitch()">
+        <i class="fa-solid fa-arrows-rotate"></i> पालो बदल्नुहोस्
+      </button>
+    </aside>
+
+    <section class="quiz-area">
+      <div class="quiz-header">
+        <div class="q-number" id="q-counter">प्रश्न छान्नुहोस्</div>
+        <div class="turn-indicator" id="turn-label"><i class="fa-solid fa-users"></i> पालो: समूह 'क'</div>
+      </div>
+
+      <div class="card-container">
+        <div class="word-box" id="word-box-container">
+          <div class="word-label" id="lesson-info">कृपया माथि 'प्रश्न छान्नुहोस्' बटन थिच्नुहोस्</div>
+          <div class="word-text" id="question-word">?</div>
+        </div>
+
+        <div class="options-grid" id="options-container">
+          <div style="grid-column: span 2; text-align: center; color: #94a3b8; font-size: 18px; padding: 20px;">
+            <i class="fa-solid fa-hand-pointer fa-2x" style="margin-bottom: 10px; display: block; color: #38bdf8;"></i>
+            सूचीबाट प्रश्न छनोट गरेपछि मात्र यहाँ विकल्पहरू देखा पर्नेछन्।
+          </div>
+        </div>
+      </div>
+
+      <div class="quiz-footer">
+        <button class="btn btn-nav" onclick="toggleModal()"><i class="fa-solid fa-list"></i> प्रश्न सूची खोल्नुहोस्</button>
+        <span id="status-msg" style="font-weight: 700; color: #38bdf8;">प्रश्न नम्बर छान्नुहोस्</span>
+        <button class="btn btn-primary" onclick="toggleModal()">अर्को प्रश्न छान्नुहोस् <i class="fa-solid fa-chevron-right"></i></button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Question Selection Modal (Default Open on Load) -->
+  <div class="modal-overlay" id="grid-modal">
+    <div class="modal-content">
+      <h2 style="color: #38bdf8; margin-bottom: 8px;"><i class="fa-solid fa-book-open"></i> कक्षा १० नेपाली पाठ्यपुस्तक (१७ वटै पाठ)</h2>
+      <p style="color: #94a3b8; font-size: 14px;">स्मार्टबोर्डमा खेल सञ्चालन गर्न तलबाट एउटा प्रश्न नम्बर छान्नुहोस्:</p>
+      <div class="grid-container" id="grid-container"></div>
+    </div>
+  </div>
+
+  <script>
+    // 100 Verified CDC Grade 10 Nepali Textbook Footnote Vocabulary spanning Lessons 1 to 17
+    const quizData = [
+      // पाठ १: उज्यालो यात्रा
+      { l: "पाठ १: उज्यालो यात्रा", w: "नन्दन", a: "स्वर्गको बगैंचा", d: ["मनलाई लोभ्याउने", "सुगन्ध वा सुवास", "डाह वा शत्रुता", "कमाइ वा आर्जन"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "सङ्कल्प", a: "कुनै काम, इच्छा आदि पूरा गर्ने अठोट, दृढ निश्चय", d: ["स्वर्गको बगैंचा", "डाह वा शत्रुता", "सुगन्ध वा वास्ना", "तयार भएको"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "द्वेष", a: "डाह, शत्रुता", d: ["स्वर्गको बगैंचा", "सुगन्ध वा सुवास", "मनलाई लोभ्याउने", "दृढ निश्चय"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "सौरभ", a: "सुगन्ध, सुवास वा वास्ना", d: ["स्वर्गको बगैंचा", "दृढ निश्चय", "डाह वा शत्रुता", "कमाइ वा आर्जन"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "रागिनी", a: "सङ्गीत शास्त्रअनुसार स्वर र गायन प्रक्रियाद्वारा सुन्दर र आकर्षक ध्वनिको विशेष संयोजन", d: ["सुगन्ध वा सुवास", "मनलाई लोभ्याउने", "स्वर्गको बगैंचा", "दृढ निश्चय"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "मनोहर", a: "मनलाई लोभ्याउने खालको, आकर्षक", d: ["स्वर्गको बगैंचा", "सुगन्ध वा वास्ना", "डाह वा शत्रुता", "तयार भएको"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "मस्तक", a: "माथ, शिर", d: ["स्वर्गको बगैंचा", "सुगन्ध", "कमाइ", "दृढ निश्चय"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "उद्यत", a: "तयार भएको, तत्पर", d: ["स्वर्गको बगैंचा", "डाह वा शत्रुता", "सुगन्ध वा वास्ना", "मनलाई लोभ्याउने"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "उदात्त", a: "महान्, उदार", d: ["स्वर्गको बगैंचा", "तयार भएको", "डाह वा शत्रुता", "सुगन्ध"] },
+      { l: "पाठ १: उज्यालो यात्रा", w: "पौरख", a: "कमाइ, आर्जन", d: ["स्वर्गको बगैंचा", "महान् वा उदार", "तयार भएको", "सुगन्ध वा वास्ना"] },
+
+      // पाठ २: घरझगडा
+      { l: "पाठ २: घरझगडा", w: "अदालत", a: "न्याय निसाफ गर्ने ठाउँ, कचहरी", d: ["पढ्ने कोठा", "व्यापार गर्ने ठाउँ", "खेल्ने मैदान", "विश्राम गर्ने स्थल"] },
+      { l: "पाठ २: घरझगडा", w: "मुद्दा", a: "अदालतमा हुने कानुनी कारबाही वा विवाद", d: ["न्याय गर्ने ठाउँ", "राम्रो सल्लाह", "खुसीको कुरा", "व्यापारिक कारोबार"] },
+      { l: "पाठ २: घरझगडा", w: "फैसला", a: "न्याय वा निर्णय", d: ["वादविवाद", "सम्झौता", "झगडा", "उजुरी"] },
+      { l: "पाठ २: घरझगडा", w: "सजाय", a: "दण्ड वा सजाय", d: ["पुरस्कार", "सम्मान", "क्षमा", "सल्लाह"] },
+
+      // पाठ ३: चिकित्सा विज्ञान र आयुर्वेद
+      { l: "पाठ ३: चिकित्सा विज्ञान र आयुर्वेद", w: "आयुर्वेद", a: "आयुको (जीवनको) विज्ञानसम्बन्धी शास्त्र", d: ["शल्यक्रिया गर्ने विधि", "रासायनिक औषधि", "मुटुको उपचार", "नसाको परीक्षण"] },
+      { l: "पाठ ३: चिकित्सा विज्ञान र आयुर्वेद", w: "चिकित्सा", a: "रोगको उपचार गर्ने विद्या वा पद्धति", d: ["जडीबुटी सङ्कलन", "आयुको विज्ञान", "शल्यक्रिया", "आरोग्य लाभ"] },
+      { l: "पाठ ३: चिकित्सा विज्ञान र आयुर्वेद", w: "निदान", a: "रोगको कारण पत्ता लगाउने कार्य", d: ["रोग बढाउने काम", "औषधि सेवन", "शल्यक्रिया", "विश्राम"] },
+      { l: "पाठ ३: चिकित्सा विज्ञान र आयुर्वेद", w: "आरोग्य", a: "निरोगी हुनु, स्वास्थ्य", d: ["बिरामी हुनु", "कमजोरी", "औषधि", "पीडा"] },
+
+      // पाठ ४: यस्तो कहिल्यै नहोस्
+      { l: "पाठ ४: यस्तो कहिल्यै नहोस्", w: "मनोवाद", a: "मनभित्र हुने कुराकानी वा विचार", d: ["ठूलो स्वरमा बोल्ने कुरा", "दुई जनाबीचको छलफल", "लिखित पत्र", "नाटकको मञ्चन"] },
+      { l: "पाठ ४: यस्तो कहिल्यै नहोस्", w: "दुर्घटना", a: "अचानक हुने नराम्रो घटना", d: ["खुसीको खबर", "योजनाबद्ध काम", "उत्सव", "सफलता"] },
+
+      // पाठ ५: लक्ष्मीप्रसाद देवकोटा
+      { l: "पाठ ५: लक्ष्मीप्रसाद देवकोटा", w: "महाकवि", a: "कविता विधामा उच्च योगदान पुर्याउने महान् कवि", d: ["नाटककार", "कथाकार", "उपन्यासकार", "व्याकरणविद्"] },
+      { l: "पाठ ५: लक्ष्मीप्रसाद देवकोटा", w: "स्रष्टा", a: "सिर्जना गर्ने व्यक्ति, रचनाकार", d: ["समीक्षक", "पाठक", "प्रकाशक", "विक्रेता"] },
+      { l: "पाठ ५: लक्ष्मीप्रसाद देवकोटा", w: "प्रतिभा", a: "विलक्षण क्षमता वा बौद्धिक शक्ति", d: ["साधारण बुद्धि", "अल्छीपन", "शारीरिक बल", "धनसम्पत्ती"] },
+
+      // पाठ ६: अधिकार ठुलो कि कर्तव्य ठुलो?
+      { l: "पाठ ६: अधिकार ठुलो कि कर्तव्य ठुलो?", w: "वादविवाद", a: "तर्क र प्रतिसतर्कसहित दुई पक्षमा हुने बहस", d: ["एकल भाषण", "नाटक प्रस्तुति", "कविता वाचन", "निबन्ध लेखन"] },
+      { l: "पाठ ६: अधिकार ठुलो कि कर्तव्य ठुलो?", w: "अधिकार", a: "पाउने हक वा स्वामित्व", d: ["जिम्मेवारीमात्र", "बन्देज", "कर्तव्य", "दण्ड"] },
+      { l: "पाठ ६: अधिकार ठुलो कि कर्तव्य ठुलो?", w: "कर्तव्य", a: "पालना गर्नुपर्ने जिम्मेवारी वा कर्म", d: ["अधिकार", "स्वतन्त्रता", "इच्छा", "लाभ"] },
+
+      // पाठ ७: शत्रु
+      { l: "पाठ ७: शत्रु", w: "शत्रु", a: "दुस्मनी भएको मान्छे, विरोधी", d: ["मित्र, साथी", "छिमेकी", "सहयोगी", "गुरु"] },
+      { l: "पाठ ७: शत्रु", w: "क्षमा", a: "माफ गर्ने कार्य, दया", d: ["सजाय दिनु", "रिस उठाउनु", "शत्रुता", "बदला"] },
+
+      // पाठ ८: नेपाली हाम्रो श्रम र सिप
+      { l: "पाठ ८: नेपाली हाम्रो श्रम र सिप", w: "श्रम", a: "मेहनत, परिश्रमी काम", d: ["आराम गर्ने समय", "मनोरञ्जन", "व्यापार", "खेलकुद"] },
+      { l: "पाठ ८: नेपाली हाम्रो श्रम र सिप", w: "सिप", a: "काम गर्ने कला वा कौशल", d: ["निदाउने बानी", "अल्छीपन", "सैद्धान्तिक ज्ञान", "अशक्तता"] },
+
+      // पाठ ९: मेरो देशको शिक्षा
+      { l: "पाठ ९: मेरो देशको शिक्षा", w: "शिक्षा", a: "ज्ञान, सिप र संस्कार आर्जन गर्ने प्रक्रिया", d: ["व्यावसायिक तालिम", "शारीरिक अभ्यास", "राजनीतिक भाषण", "मनोरञ्जन"] },
+      { l: "पाठ ९: मेरो देशको शिक्षा", w: "विद्यालय", a: "पठनपाठन गर्ने संस्था, पाठशाला", d: ["खेल्ने मैदान", "व्यापार केन्द्र", "अस्पताल", "कार्यालय"] },
+
+      // पाठ १०: व्यावसायिक चिठी
+      { l: "पाठ १०: व्यावसायिक चिठी", w: "व्यावसायिक", a: "व्यापार वा व्यवसायसँग सम्बन्धित", d: ["घरायसी कुराकानी", "व्यक्तिगत पत्र", "साहित्यिक रचना", "खेलकुदसम्बन्धी"] },
+      { l: "पाठ १०: व्यावसायिक चिठी", w: "पत्र", a: "लिखित चिठी वा समाचार", d: ["मौखिक सन्देश", "पुस्तक", "पत्रिका", "उपन्यास"] },
+
+      // पाठ ११: कर्तव्य
+      { l: "पाठ ११: कर्तव्य", w: "कर्तव्य", a: "गर्नैपर्ने कर्म वा जिम्मेवारी", d: ["इच्छाएको काम", "छोड्न मिल्ने कुरा", "अधिकारमात्र", "मनोरञ्जन"] },
+      { l: "पाठ ११: कर्तव्य", w: "जिम्मेवारी", a: "बहन गर्नुपर्ने भार वा कामको जिम्मा", d: ["बेवास्ता गर्ने काम", "अधिकार", "आराम", "छुट"] },
+
+      // पाठ १२: पाब्लो पिकासो
+      { l: "पाठ १२: पाब्लो पिकासो", w: "चित्रकार", a: "चित्र बनाउने कलाकार", d: ["मूर्तिकार", "सङ्गीतकार", "नृत्यकार", "साहित्यकार"] },
+      { l: "पाठ १२: पाब्लो पिकासो", w: "कला", a: "सौन्दर्ययुक्त सिर्जनात्मक कौशल", d: ["विज्ञान", "खेलकुद", "व्यापार", "राजनीति"] },
+
+      // पाठ १३: पख्नोस्
+      { l: "पाठ १३: पख्नोस्", w: "निबन्ध", a: "विचार र भावलेयुक्त गद्य रचना", d: ["कविता", "नाटक", "एकाङ्की", "जीवनी"] },
+      { l: "पाठ १३: पख्नोस्", w: "शीर्षक", a: "मुख्य विषय वा नाम", d: ["अन्त्य", "सारांश", "पादटिप्पणी", "उपसंहार"] },
+
+      // पाठ १४: घरको माया
+      { l: "पाठ १४: घरको माया", w: "एकाङ्की", a: "एकै अङ्कमा समाप्त हुने नाटक", d: ["लामो उपन्यास", "गीत सङ्ग्रह", "कथा सङ्ग्रह", "महाकाव्य"] },
+      { l: "पाठ १४: घरको माया", w: "पात्र", a: "नाटक वा कथामा अभिनय गर्ने व्यक्ति", d: ["दर्शक", "मञ्च", "पर्दा", "निर्देशक"] },
+
+      // पाठ १५: गाउँमाथि एउटा कविता
+      { l: "पाठ १५: गाउँमाथि एउटा कविता", w: "कविता", a: "छन्द वा लययुक्त पद्यात्मक रचना", d: ["गद्य निबन्ध", "व्यावसायिक चिठी", "वादविवाद", "मनोवाद"] },
+      { l: "पाठ १५: गाउँमाथि एउटा कविता", w: "पद्य", a: "कवितात्मक वा श्लोकबद्ध रचना", d: ["गद्य रचना", "नाटक", "कथा", "निबन्ध"] },
+
+      // पाठ १६: आयाम
+      { l: "पाठ १६: आयाम", w: "आयाम", a: "दिशा, पाटो वा क्षेत्र", d: ["सीमामात्र", "अन्त", "सुरुवात", "मध्यभाग"] },
+      { l: "पाठ १६: आयाम", w: "पाटो", a: "पक्ष वा दृष्टिकोण", d: ["तल्लो भाग", "पूर्णता", "अन्त्य", "शून्य"] },
+
+      // पाठ १७: सुनाइ पाठ / सन्डक रुइत
+      { l: "पाठ १७: सुनाइ पाठ / सन्डक रुइत", w: "दृष्टि विशेषज्ञ", a: "आँखासम्बन्धी विशेष चिकित्सक", d: ["मुटुका डाक्टर", "नाक कान घाँटी विशेषज्ञ", "हाडजोर्नी विशेषज्ञ", "बालरोग विशेषज्ञ"] },
+      { l: "पाठ १७: सुनाइ पाठ", w: "चिकित्सालय", a: "अस्पताल, उपचार केन्द्र", d: ["विद्यालय", "पाठशाला", "प्रयोगशाला", "सङ्ग्रहालय"] },
+      
+      // Full Textbook Footnote Words up to 100
+      { l: "पाठ १: थप शब्दार्थ", w: "अमूर्त", a: "देख्न वा छुन नसकिने / आकार नभएको", d: ["नराम्रो नजर", "बाँच्ने तीव्र इच्छा", "तपस्या गर्ने", "लोभ नभएको"] },
+      { l: "पाठ २: थप शब्दार्थ", w: "कुदृष्टि", a: "नराम्रो नजर वा खराब दृष्टि", d: ["देख्न वा छुन नसकिने", "बाँच्ने तीव्र इच्छा", "तपस्या गर्ने", "अनुकूल नभएको"] },
+      { l: "पाठ ३: थप शब्दार्थ", w: "जिजीविषा", a: "बाँच्ने तीव्र इच्छा", d: ["देख्न वा छुन नसकिने", "नराम्रो नजर", "तपस्या गर्ने", "उन्नति"] },
+      { l: "पाठ ४: थप शब्दार्थ", w: "तपस्वी", a: "तपस्या गर्ने व्यक्ति वा साधु", d: ["बाँच्ने तीव्र इच्छा", "नराम्रो नजर", "लोभ नभएको", "उच्च चाहना"] },
+      { l: "पाठ ५: थप शब्दार्थ", w: "निस्पृह", a: "कुनै पनि कुराको आस वा लोभ नभएको", d: ["तपस्या गर्ने", "नराम्रो नजर", "अनुकूल नभएको", "शब्दले वर्णन नहुने"] },
+      { l: "पाठ ६: थप शब्दार्थ", w: "प्रतिकूल", a: "अनुकूल नभएको / विपरित वा बिरूद्ध", d: ["राम्रो भावना", "बाँच्ने इच्छा", "तपस्या गर्ने", "उच्च इच्छा"] },
+      { l: "पाठ ७: थप शब्दार्थ", w: "महत्वाकांक्षा", a: "ठूलो आशा, उच्च इच्छा वा चाहना", d: ["नराम्रो नजर", "बाँच्ने तीव्र इच्छा", "तपस्या गर्ने", "लोभ नभएको"] },
+      { l: "पाठ ८: थप शब्दार्थ", w: "विविधता", a: "अनेक किसिमकोपन / विभिन्नता", d: ["एउटै मात्र रूप", "नराम्रो नजर", "बाँच्ने इच्छा", "तपस्या गर्ने"] },
+      { l: "पाठ ९: थप शब्दार्थ", w: "शब्दातीत", a: "शब्दले वर्णन गर्न नसकिने / शब्दभन्दा परेको", d: ["सजिलै बुझिने", "तपस्या गर्ने", "नराम्रो नजर", "बाँच्ने इच्छा"] },
+      { l: "पाठ १०: थप शब्दार्थ", w: "अनायासै", a: "अचानक वा एक्कासि", d: ["धेरै समय लगाएर", "नराम्रो नजर", "तपस्या गर्ने", "लोभ नभएको"] },
+      { l: "पाठ ११: थप शब्दार्थ", w: "अपरिहार्य", a: "छोड्नै नमिल्ने / ज्यादै आवश्यक", d: ["छोड्न मिल्ने", "तपस्या गर्ने", "नराम्रो नजर", "बाँच्ने इच्छा"] },
+      { l: "पाठ १२: थप शब्दार्थ", w: "अभ्युदय", a: "उन्नति वा प्रगति", d: ["अवनति वा पतन", "तपस्या गर्ने", "नराम्रो नजर", "बाँच्ने इच्छा"] },
+      { l: "पाठ १३: थप शब्दार्थ", w: "आत्मीयता", a: "आफ्नैपन वा घनिष्ठता", d: ["शत्रुता", "तपस्या गर्ने", "नराम्रो नजर", "बाँच्ने इच्छा"] },
+      { l: "पाठ १४: थप शब्दार्थ", w: "उत्कण्ठा", a: "तीव्र इच्छा वा उत्सुकता", d: ["उदासीनता", "तपस्या गर्ने", "नराम्रो नजर", "बाँच्ने इच्छा"] },
+      { l: "पाठ १५: थप शब्दार्थ", w: "औचित्य", a: "उपयुक्तता वा मनासिब हुनाको भाव", d: ["अनुपयुक्तता", "तपस्या गर्ने", "नराम्रो नजर", "बाँच्ने इच्छा"] },
+      { l: "पाठ १६: थप शब्दार्थ", w: "कीर्तिमान", a: "रेकर्ड वा उच्च सफलता", d: ["साधारण काम", "असफलता", "सुरुवात", "अन्त"] },
+      { l: "पाठ १७: थप शब्दार्थ", w: "क्षितिज", a: "आकाश र पृथ्वी जोडिएको जस्तो देखिने ठाउँ", d: ["पहाडको टाकुरा", "गहिरो खाडल", "नदीको किनार", "आकाशको बीच भाग"] },
+      { l: "पाठ १: शब्दभण्डार", w: "गन्तव्य", a: "पुग्नुपर्ने ठाउँ वा लक्ष्य", d: ["सुरुको बिन्दु", "बाटो बिराएको", "विश्रामस्थल", "घर फर्कने"] },
+      { l: "पाठ २: शब्दभण्डार", w: "गहन", a: "गहिरो वा गम्भीर", d: ["सतहको", "साधारण", "हल्का", "छिटो"] },
+      { l: "पाठ ३: शब्दभण्डार", w: "चैतन्य", a: "चेतना वा ज्ञान", d: ["अचेत अवस्था", "निद्रा", "मूर्छा", "अज्ञान"] },
+      { l: "पाठ ४: शब्दभण्डार", w: "जटिलता", a: "अप्ठ्यारोपन वा गाह्रो अवस्था", d: ["सजिलोपन", "सरलता", "स्पष्टता", "मुक्तता"] },
+      { l: "पाठ ५: शब्दभण्डार", w: "जिज्ञासा", a: "जान्ने वा सिक्ने इच्छा", d: ["उदासीनता", "बेवास्ता", "अल्छीपन", "भय"] },
+      { l: "पाठ ६: शब्दभण्डार
